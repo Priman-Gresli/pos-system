@@ -8,7 +8,7 @@ const btnSave = $("#btn-save");
 
 tbodyElm.empty();
 
-function formatCustomerId(){
+function formatCustomerId(id){
     return `C${id.toString().padStart(3,"0")}`
 }
 
@@ -106,18 +106,17 @@ function validateData(){
 
     if (!address){
         valid = invalidate(txtAddress,'Address can not be empty')
-    }
-    if (!/.{3,}/.test(address)){
+    }else if(!/.{3,}/.test(address)){
         valid = invalidate(txtAddress,'Invalid Address')
     }
     if (!contact){
         valid = invalidate(txtContact,'Contact number can not be empty');
-    }else if (!/^\d{3}-\d{7}$/){
+    }else if (!/^\d{3}-\d{7}$/.test(contact)){
         valid = invalidate(txtContact,'Invalid contact');
     }
     if (!name){
         valid = invalidate(txtName,'Name can not be empty');
-    }else if(!/^[A-Za-z ]+$/){
+    }else if(!/^[A-Za-z ]+$/.test(name)){
         valid = invalidate(txtName,'Invalid name');
     }
     return valid;

@@ -8,8 +8,8 @@ const btnSaveItem = $("#btn-save");
 
 itemTbodyElm.empty();
 
-function formatCustomerId(){
-    return `C${id.toString().padStart(3,"0")}`
+function formatItemCode(code){
+    return `I${code.toString().padStart(3,"0")}`
 }
 
 itemModalElm.on('show.bs.modal', ()=> {
@@ -27,13 +27,13 @@ btnSaveItem.on('click', () => {
         return false;
     }
     /* To do */
-    const name = txtDescription.val();
-    const id = txtCode.val();
-    const address = txtStock.val();
-    const contact = txtUnitPrize.val();
+    const description = txtDescription.val();
+    const code = txtCode.val();
+    const stock = txtStock.val();
+    const unitPrize = txtUnitPrize.val();
 
-    let customer = {
-        name, contact, address
+    let item = {
+        description, unitPrize, stock
     };
     /*1. create xhr object*/
     const xhr = new XMLHttpRequest();
@@ -44,13 +44,13 @@ btnSaveItem.on('click', () => {
             [txtDescription,txtStock,txtUnitPrize].forEach(txt=>txt.removeAttr('disabled'));
             $("#loader").css('visibility','hidden');
             if (xhr.status === 201) {
-                customer = JSON.parse(xhr.responseText);
+                item = JSON.parse(xhr.responseText);
                 itemTbodyElm.append(`
         <tr>
-            <td class="text-center">${formatCustomerId(customer.id)}</td>
-            <td>${customer.name}</td>
-            <td class="d-none d-xl-table-cell">${customer.address}</td>
-            <td class="contact text-center">${customer.contact}</td>
+            <td class="text-center">${formatItemCode(item.code)}</td>
+            <td>${item.description}</td>
+            <td class="d-none d-xl-table-cell">${item.stock}</td>
+            <td class="contact text-center">${item.unitPrize}</td>
             <td>
                 <div class="actions d-flex gap-3 justify-content-center">
                     <svg data-bs-toggle="tooltip" data-bs-title="Edit Customer" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
@@ -79,13 +79,13 @@ btnSaveItem.on('click', () => {
         }
     });
     /*3. let's open the request*/
-    xhr.open('POST', 'http://localhost:8080/pos/customers', true);
+    xhr.open('POST', 'http://localhost:8080/pos/items', true);
 
     /*4. let's set some request headers*/
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     /*5. okay time to send the request*/
-    xhr.send(JSON.stringify(customer));
+    xhr.send(JSON.stringify(item));
     [txtDescription,txtStock,txtUnitPrize].forEach(txt=>txt.attr('disabled','true'));
     $("#loader").css('visibility','visible');
     /*for successful response*/
@@ -94,31 +94,30 @@ btnSaveItem.on('click', () => {
 
     resetForm(true);
     txtDescription.trigger('focus');
-    showToast('success', 'Saved', 'Customer has been successfully saved')
+    showToast('success', 'Saved', 'Item has been successfully saved')
 });
 
 function validateData(){
-    const address = txtStock.val().trim();
-    const contact = txtUnitPrize.val().trim();
-    const name = txtDescription.val().trim();
+    const stock = txtStock.val().trim();
+    const unitPrize = txtUnitPrize.val().trim();
+    const description = txtDescription.val().trim();
     let valid = true;
     resetForm();
 
-    if (!address){
-        valid = invalidate(txtStock,'Address can not be empty')
+    if (!stock){
+        valid = invalidate(txtStock,'Stock can not be empty')
+    }else if (!/^[1-9][0-9]+$/.test(stock)){
+        valid = invalidate(txtStock,'Invalid Stock')
     }
-    if (!/.{3,}/.test(address)){
-        valid = invalidate(txtStock,'Invalid Address')
+    if (!unitPrize){
+        valid = invalidate(txtUnitPrize,'Unit Prize can not be empty');
+    }else if (!/^[1-9][0-9]+$/.test(unitPrize)){
+        valid = invalidate(txtUnitPrize,'Invalid unitPrize');
     }
-    if (!contact){
-        valid = invalidate(txtUnitPrize,'Contact number can not be empty');
-    }else if (!/^\d{3}-\d{7}$/){
-        valid = invalidate(txtUnitPrize,'Invalid contact');
-    }
-    if (!name){
-        valid = invalidate(txtDescription,'Name can not be empty');
-    }else if(!/^[A-Za-z ]+$/){
-        valid = invalidate(txtDescription,'Invalid name');
+    if (!description){
+        valid = invalidate(txtDescription,'Description can not be empty');
+    }else if(!/^[A-Za-z ]+$/.test(description)){
+        valid = invalidate(txtDescription,'Invalid description');
     }
     return valid;
 }
